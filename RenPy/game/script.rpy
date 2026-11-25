@@ -24,8 +24,8 @@ init python:
     config.layers = ['background', 'master', 'foreground', 'characters', 'transient', 'screens', 'overlay']
 
 define sash = Character("Sash", callback=typewriter)
-define tai = Character("Tai", callback=typewriter, cb_fileName="B4.ogg")
-define unknownTai = Character("???", callback=typewriter, cb_fileName="B4.ogg")
+define tai = Character("Tai", callback=typewriter, cb_fileName="B2.ogg")
+define unknownTai = Character("???", callback=typewriter, cb_fileName="B2.ogg")
 define fan = Character("Fan", callback=typewriter, cb_fileName="B5.ogg")
 define narrator = Character("", callback=typewriter, cb_fileName="B4.ogg")
 
@@ -56,12 +56,11 @@ label start:
 
     show sash neutral onlayer master at right, half_size
 
-    # These display lines of dialogue.
     sash "Ugh.{w=0.2} Another one of these?"
     sash "Screw this."
     sash "{i}Ugh.{w=0.2} I don't want to go.{/i}"
     sash "Think of the money,{w=0.2} think of the money."
-    
+    hide sash neutral
     # TODO: Try to see if the transition can made cleaner?
     scene meet and greet with fade
     show table onlayer foreground
@@ -74,7 +73,8 @@ label start:
     fan "You're my favourite streamer!"
     sash "Oh!{w=0.2} Thank you!"
     
-    show tai neutral onlayer master at center, half_size with dissolve
+    show tai neutral onlayer master at center, half_size with dissolve:
+        ypos 1.1
 
     # TODO: Add expression changes everywhere
 
@@ -95,9 +95,6 @@ label start:
 
     sash "Oh,{w=0.2} um...{w=0.5} I don't know...{w=0.5} I have a lot to do after this..."
     tai "Come on,{w=0.2} it's been forever."
-
-    play audio "heartbeat.ogg" volume 0.75
-
     tai "{cps=30}You {i}owe{/i} me.{/cps}"
 
     play audio "heartbeat.ogg" volume 0.75
@@ -110,9 +107,9 @@ label start:
     sash "{cps=20}...{/cps}"
 
     # TODO: I can't get Sash to disappear, for some reason?????
-    
-    hide sash neutral with dissolve
-    hide table
+
+    hide sash neutral onlayer characters
+    hide table onlayer foreground
 
     scene hallway with fade
     show sash neutral at center, half_size
@@ -127,16 +124,20 @@ label start:
     sash "Oh,{w=0.2} uh,{w=0.2} yeah.{w=0.5} Yes,{w=0.2} I am."
     fan "Can I get a picture?"
     fan "Thanks!{w=0.5} You rock!"
+    sash "{cps=30}...{/cps}"
 
     scene greenroom with fade
-    show sash neutral at right, half_size, with dissolve
-    show tai neutral at left, half_size, with dissolve
+    show sash neutral at right, half_size, with dissolve:
+        ypos 1.2
+    show tai neutral at left, half_size, with dissolve:
+        ypos 1.2
 
     sash "So,{w=0.2} um,{w=0.2} how have you been?"
     tai "Okay.{w=0.5} Nothing compared to {i}you{/i},{w=0.2} though.{w=0.5} Seems like you got a pretty nice life."
     sash "Yeah...{w=0.5} Um,{w=0.2} can you believe all of this?"
     sash "To think it all started with a high school gaming club is crazy."
-    tai "{cps=20}{i}Our{/i}{/cps} high school gaming club.{w=0.5} I taught you SnailBlasterz...{w=0.5} That was your whole thing when you started streaming."
+    tai "{cps=20}{i}Our{/i}{/cps} high school gaming club."
+    tai "I taught you SnailBlasterz...{w=0.5} That was your whole thing when you started streaming."
     sash "That was a long time ago.{w=0.5} I think my career is beyond SnailBlasterz now."
     tai "Come on,{w=0.2} you couldn't have done it without me."
 
@@ -160,13 +161,16 @@ label start:
     hide tai neutral
     # scene interrogation with dissolve
 
+    # TODO: add branching paths
+
     sash "You—"
+
+    sash "{cps=20}Wait...{/cps}{w=0.2} What is that?"
+    sash "You're one of my trolls?"
 
     # TODO: CG zooms in as Sash notices the profile picture
     # scene interrogation zoom with dissolve
 
-    sash "{cps=20}Wait...{/cps}{w=0.2} What is that?"
-    sash "You're one of my trolls?"
     tai "I'd be surprised if I wasn't most of them.{w=0.5} Now,{w=0.2} {cps=15}{i}say it{/i}.{/cps}"
     tai "{size=*1.5}SAY IT!{/size}"
     sash "Fine!{w=0.5} Whatever!{w=0.5} Tai Nagawa made me famous."
@@ -188,4 +192,21 @@ label start:
     hide sash with dissolve
     # This ends the game.
 
+    return
+
+label give_in:
+
+    return
+
+label resist_one:
+
+    return
+
+label resist_two:
+
+    return
+
+label resist_three:
+
+    # TODO: This is the ending where sash resist all the time and is given three options of "Give in."
     return
