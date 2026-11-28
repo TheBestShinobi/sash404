@@ -11,7 +11,15 @@ transform half_size:
 transform quarter_size:
     zoom 0.25
 
+transform sash_display:
+    quarter_size
+    xalign 0.85
+    yalign 0.96
+
 init python:
+
+    renpy.music.register_channel("bg_noise")
+
     def typewriter(event, interact=True, fileName="A3.ogg", **kwargs):
         if not interact:
             return
@@ -23,14 +31,13 @@ init python:
     # GUI usually goes on 'screens'
     config.layers = ['background', 'master', 'foreground', 'characters', 'transient', 'screens', 'sash_layer', 'overlay']
 
-define sash = Character("Sash", callback=typewriter)
-define tai = Character("Tai", callback=typewriter, cb_fileName="B2.ogg")
-define unknownTai = Character("???", callback=typewriter, cb_fileName="B2.ogg")
-define fan = Character("Fan", callback=typewriter, cb_fileName="B5.ogg")
-define narrator = Character("", callback=typewriter, cb_fileName="B4.ogg")
-
-# TODO : DEFINE AN IMAGE HERE FOR THE TOP OF THE TEXT BOX SEPARATING THE TEXT AND THE REST OF THE SCENE
-# This line will later become the line for the heart beat sound effect as Sash gets increasingly scared
+# TODO: define custom name boxes
+# TODO: fix custom name boxes
+define sash = Character("Sash", callback=typewriter, who_ypos=-20, namebox_xpos=1000)
+define tai = Character("Tai", callback=typewriter, cb_fileName="B2.ogg", who_ypos=-20)
+define unknownTai = Character("???", callback=typewriter, cb_fileName="B2.ogg", who_ypos=-20)
+define fan = Character("Fan", callback=typewriter, cb_fileName="B5.ogg", who_ypos=-20)
+define narrator = Character("", callback=typewriter, cb_fileName="B4.ogg", who_ypos=-20)
 
 # The pauses should be set apart so that the animation itself lasts only a second
 image HeartLine:
@@ -45,16 +52,16 @@ image HeartLine:
     "heartline_05.png"
     0.025
 
-
-
 # GAME START
 label start:
 
+    # TODO: replace the greenroom png with the new notif cg and reveal sash later
+    # scene notifications
+
     scene greenroom
+    show sash irritated onlayer sash_layer at sash_display
 
-    # TODO: Figure out a way to display Sash only in the bottom corner of the screen
-
-    show sash irritated onlayer sash_layer at right, quarter_size
+    play audio "Notification Ding.mp3" volume 0.5
 
     sash "Ugh. Another one of these?"
     sash "Screw this."
@@ -62,8 +69,8 @@ label start:
     show sash mad onlayer sash_layer at right, quarter_size
     sash "Think of the money,{w=0.1} think of the money."
 
-    # TODO: Try to see if the transition can made cleaner?
     scene meet and greet with fade
+    play bg_noise "Convention Crowd.mp3" volume 0.5 loop
     show table onlayer foreground
     show sash too_smilely onlayer sash_layer at right, quarter_size with dissolve
 
@@ -82,10 +89,11 @@ label start:
     show tai neutral onlayer master at center, half_size with dissolve:
         ypos 1.1
 
-    # TODO: Add expression changes everywhere
     show sash sussed_out onlayer characters at right, quarter_size
     unknownTai "Hey,{w=0.2} remember me?"
+    $ renpy.music.set_volume(0.4,channel="bg_noise")
     play audio "heartbeat.ogg" volume 0.75
+    
     # TODO:
     # show heartline at center
     # This would need to be the heart line animation, so playing around with pause and whatnot to show frame by frame whatever
@@ -100,7 +108,7 @@ label start:
     show tai sus
     tai "Anyway,{w=0.2} I came to see if you wanted to catch up after all this.{w=0.5} Maybe game a little."
 
-    play audio "heartbeat.ogg"
+    play audio "heartbeat.ogg" volume 0.75
 
     show sash confused_smile onlayer sash_layer at right, quarter_size
     sash "Oh,{w=0.2} um...{w=0.5} I don't know...{w=0.5} I have a lot to do after this..."
@@ -110,10 +118,12 @@ label start:
     tai "{cps=30}You {i}owe{/i} me.{/cps}"
 
     play audio "heartbeat.ogg" volume 0.75
+    $ renpy.music.set_volume(0,channel="bg_noise")
 
     show sash sussed_out onlayer sash_layer at right, quarter_size
     sash "Okay,{w=0.2} okay,{w=0.2} sure.{w=0.5} Fine."
     show tai neutral
+    $ renpy.music.set_volume(0.5,channel="bg_noise")
     tai "Meet me outside at five?"
     show sash too_smilely onlayer sash_layer at right, quarter_size
     sash "Sure!"
@@ -121,6 +131,7 @@ label start:
     show sash mad onlayer sash_layer at right, quarter_size
     sash "{cps=20}...{/cps}"
 
+    stop bg_noise fadeout 2.0
     hide sash mad onlayer characters
     hide table onlayer foreground
 
@@ -129,7 +140,6 @@ label start:
     
     sash "{cps=30}...{/cps}"
 
-    # TODO: lightly shake the screen to indicate someone tapping her from behind
     narrator "*tap,{w=0.1} tap*" with vpunch
     play audio "heartbeat.ogg" volume 0.75
     show sash extra onlayer sash_layer at right, quarter_size
@@ -138,16 +148,28 @@ label start:
     show sash confused_smile onlayer sash_layer at right, quarter_size
     sash "Oh, uh, yeah.{w=0.5} Yes, I am."
     fan "Can I get a picture?"
-# TODO: add camera shutter sound
 
-    fan "Thanks!{w=0.5} You rock!"
-    show sash mad onlayer sash_layer at right, quarter_size
+# TODO: display selfie CG here
+    hide sash confused_smile onlayer sash_layer
+    # scene selfie
+    sash "Sure thing! Three, two, one..."
+    play audio "Camera Click.mp3"
+    fan "Thanks!{w=0.3} You rock!"
+    sash "No problem. Make sure to catch my next stream!"
+    fan "Will do! See you, Sash!"
+
+    # scene hallway with dissolve
+    show sash extra onlayer sash_layer at right, quarter_size
     sash "{cps=30}...{/cps}"
+
+    play audio "Door Open.mp3"
 
     scene greenroom with fade
     show sash confused_smile onlayer sash_layer at right, quarter_size
     show tai neutral_closed_mouth at center, half_size, with dissolve:
         ypos 1.1
+
+    # TODO: replace all of the below until the CG with new Tai sprites
 
     sash "So,{w=0.2} um,{w=0.2} how have you been?"
     show tai neutral
@@ -163,20 +185,18 @@ label start:
     sash "That was a long time ago.{w=0.5} I think my career is beyond SnailBlasterz now."
     show tai neutral
     tai "Come on,{w=0.2} you couldn't have done it without me."
-
-    # TODO: This is where the heartbeat starts to loop and the animation also plays on loop. Create the animation later, you know how
+    
     show sash mad_talking onlayer sash_layer at right, quarter_size
     sash "It's not that difficult of a game,{w=0.2} I think I figured it out myself."
 
-    # TODO: This is the part where Tai starts breaking and Sash starts getting scared. Ramp up text effects
+    play bg_noise ["<silence 0.5>", "heartbeat.ogg"] volume 0.5 loop
 
     tai "{i}And{/i} I taught you how to stream,{w=0.2} didn't I?"
     show tai sus
-    # TODO Tai loses his mind
     tai "Admit it!{w=0.5} You couldn't have done this without me!"
     show sash sussed_out onlayer sash_layer at right, quarter_size
     sash "What are you talking about?"
-    tai "{cps=40}What am I talking about?!{/cps}"
+    tai "{cps=40}What am I talking about?{/cps}"
     tai "I'm talking about you using me to get famous and then leaving me behind!"
     show sash flabberghasted onlayer sash_layer at right, quarter_size
     sash "What the hell?{w=0.5} That's not true at all!"
@@ -184,28 +204,27 @@ label start:
     sash "Um,{w=0.2} I think you should leave."
 
     # TODO: CG switches
-    show sash irritated onlayer sash_layer at right, quarter_size
-    hide tai sus
-    # cg switches
     # scene interrogation with dissolve
+    # show sash irritated onlayer sash_layer at right, quarter_size
+    hide tai sus
     tai "I'll leave when you admit Tai Nagawa made you famous."
-
-
-    # TODO: add branching paths
 
     show sash mad onlayer sash_layer at right, quarter_size
     sash "You—"
 
     show sash extra onlayer sash_layer at right, quarter_size
     sash "{cps=20}Wait...{/cps}{w=0.2} What is that?"
+    # scene interrogation zoom
     show sash flabberghasted onlayer sash_layer at right, quarter_size
     sash "You're one of my trolls?"
 
-    # TODO: CG zooms in as Sash notices the profile picture
-    # scene interrogation zoom with dissolve
+    # scene interrogation
+    # TODO: this might just become the same cg with tai looking over at his phone case
 
     # Branching path split
     menu:
+        # TODO: this might not play the sounds?
+        # TODO: this doesn't play the typing sounds while in the menu
         tai "I'd be surprised if I wasn't most of them.{w=0.5} Now,{w=0.2} {cps=15}{i}say it{/i}.{/cps}"
 
         "Don't give in":
@@ -213,7 +232,6 @@ label start:
 
         "Give in":
             jump ending
-
 
 label resist_one:
     show sash mad_talking onlayer sash_layer at right, quarter_size
@@ -225,7 +243,6 @@ label resist_one:
     show sash irritated onlayer sash_layer at right, quarter_size
     sash "You're the one harassing me online with multiple alt accounts!"
     tai "Say it."
-
     menu:
         "Don't give in":
             jump resist_two
@@ -244,39 +261,37 @@ label resist_two:
     show sash flabberghasted onlayer sash_layer at right, quarter_size
     sash "{cps=15}What...?{/cps}"
     tai "I just need you to say one thing for me."
-
+    tai "That shouldn't be too hard for you,{w=0.2} right?"
     menu:
-        tai "That shouldn't be too hard for you,{w=0.2} right?"
-
         "Don't give in":
             jump resist_three
         "Give in":
             jump ending
 
-
-
 label resist_three:
     show sash mad_talking onlayer sash_layer at right, quarter_size
     sash "Are you obsessed with me or something?"
+    tai "Hah!{w=0.3} You wish."
+    sash "With all of this,{w=0.2} you might as well be my biggest fan."
+    tai "Don't joke around!{w=0.3} Take this seriously!"
+
     show sash mad onlayer sash_layer at right, quarter_size
     sash "Whatever,{w=0.1} I'm not listening to this."
 
     # Cg switches to sash trying to open the door but it's locked
     # light screen shake for trying to open the door
 
-    # 
+    # scene doorknob
+    sash "W-Wait,{w=0.2} the door's locked?!" with hpunch
+    $ renpy.music.set_volume(1,channel="bg_noise")
+    tai "{cps=20}Leaving so soon?{/cps}"
+    sash "Tai,{w=0.1} don't be stupid.{w=0.3} Let me leave."
+    sash "Let's both walk away,{w=0.2} and I'll pretend this never happened."
+    tai "{b}Bullshit!{/b}{w=0.3} If I let you leave now,{w=0.2} we'll never meet again,{w=0.1} will we?!"
 
-    # TODO add sound effect for Tai slamming the door
-    # play audio door_slam.ogg
-
-
-    # sash tries to physically leave the room but tai slams and locks the door forcing her to say it and scaring her a lot
-
-    # TODO: This is the ending where sash resist all the time and is given three options of "Give in."
     show sash flabberghasted onlayer sash_layer at right, quarter_size
+    tai "{size=*1.5}SAY IT!{/size}"
     menu:
-        tai "{size=*1.5}SAY IT!{/size}"
-
         "Give in.":
             jump ending
         "Give in.":
@@ -284,7 +299,10 @@ label resist_three:
         "Give in.":
             jump ending
 
+# TODO: should time allow, add the secondary joke ending
 label ending:
+    stop bg_noise
+
     show sash mad_talking onlayer sash_layer at right, quarter_size
     sash "Fine!{w=0.5} Whatever!{w=0.5} Tai Nagawa made me famous."
     tai "Say I taught you how to play."
@@ -302,11 +320,11 @@ label ending:
     show tai neutral
     tai "It was good to see you again.{w=0.5} Later!"
 
+    play audio "Door Slam.mp3" volume 0.3
     hide tai neutral with dissolve
-    
-    show sash flabberghasted onlayer sash_layer at right, quarter_size
+    show sash extra onlayer sash_layer at right, quarter_size
     sash "{cps=20}...{/cps}"
-    hide sash flabberghasted with dissolve
+    hide sash extra with dissolve
     # This ends the game.
 
     return
